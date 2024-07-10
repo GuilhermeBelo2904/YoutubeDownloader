@@ -46,8 +46,8 @@ To set up your development environment, we recommend using Visual Studio Code an
    ```
 
 ## Things We Have Left to Do
-
-1. **Download Videos**
+1. **Setting up the Youtube API**
+2. **Download Videos**
    - Display information about the video:
      - Download size
      - Name
@@ -66,13 +66,13 @@ To set up your development environment, we recommend using Visual Studio Code an
      - Ability to cut a specific part of the video
      - etc.
 
-2. **Settings**
+3. **Settings**
    - Output folder:
      - Default: Downloads
    - Light/Dark Mode
    - Window size
    - Language
 
-3. **Extra Features**
+4. **Extra Features**
    - Open the folder where the videos are downloaded
    
