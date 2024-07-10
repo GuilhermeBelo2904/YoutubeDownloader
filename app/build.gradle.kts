@@ -20,8 +20,10 @@ dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.1")
 
-    // This dependency is used by the application.
-    implementation("com.google.guava:guava:31.1-jre")
+    // YouTube API dependencies
+    implementation("com.google.api-client:google-api-client:1.33.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.33.0")
+    implementation("com.google.apis:google-api-services-youtube:v3-rev222-1.25.0")
 }
 
 application {
