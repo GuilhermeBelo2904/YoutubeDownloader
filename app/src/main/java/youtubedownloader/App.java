@@ -5,7 +5,7 @@ package youtubedownloader;
 
 public class App {
     public String getGreeting() {
-        return "Hello World!dadadadada";
+        return "Hello World!";
     }
 
     public static void main(String[] args) {
