@@ -17,6 +17,9 @@ The main goal of this project is to create a user-friendly desktop application t
 - **Gradle**: A build automation tool that is designed to be flexible enough to build almost any type of software.
   - [Gradle](https://gradle.org/)
 
+- **MVVM Model**: A design pattern that helps to separate the business logic from the user interface.
+  - [MVVM Model](https://learn.microsoft.com/pt-pt/dotnet/architecture/maui/mvvm)
+
 ## Development Environment
 
 To set up your development environment, we recommend using Visual Studio Code and SourceTree. Here are some useful links to get you started:
@@ -36,3 +39,40 @@ To set up your development environment, we recommend using Visual Studio Code an
 
 3. **Set Up Your IDE**: Follow the Visual Studio Code tutorials to set up your Java development environment.
 
+4. **Run the Application**: Use Gradle to build and run the application. You can use the following commands:
+   ```
+   ./gradlew build
+   ./gradlew run
+   ```
+
+## Things We Have Left to Do
+1. **Setting up the Youtube API**
+2. **Download Videos**
+   - Display information about the video:
+     - Download size
+     - Name
+     - Author
+     - Thumbnail and author photo
+     - Video length
+     - etc.
+   - Options:
+     - Type
+     - Quality
+     - etc.
+   - Features:
+     - If it's a playlist:
+       - Option to download all or selected videos (checklist)
+       - Display specific information for each video
+     - Ability to cut a specific part of the video
+     - etc.
+
+3. **Settings**
+   - Output folder:
+     - Default: Downloads
+   - Light/Dark Mode
+   - Window size
+   - Language
+
+4. **Extra Features**
+   - Open the folder where the videos are downloaded
+   
