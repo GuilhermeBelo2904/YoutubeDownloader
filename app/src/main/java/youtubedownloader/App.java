@@ -3,12 +3,41 @@
  */
 package youtubedownloader;
 
+import java.io.IOException;
+
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.Video;
+import com.google.api.services.youtube.model.VideoListResponse;
+
+import youtubedownloader.model.YoutubeAPI;
+
 public class App {
+    static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
+    static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=LrBu3247qOI";
+
     public String getGreeting() {
         return "Hello World!";
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        YoutubeAPI youtubeAPI = new YoutubeAPI();
+
+        YouTube youtubeService = youtubeAPI.getYouTubeService();
+        String videoId = youtubeAPI.getVideoId(YOUTUBE_LINK_EXAMPLE);
+
+        YouTube.Videos.List request;
+        try {
+            request = youtubeService.videos().list("snippet").setId(videoId).setKey(API_KEY);
+            // System.out.println(request.execute().toPrettyString());
+
+            VideoListResponse response = request.execute();
+            var searchResults = response.getItems();
+
+            for (Video result : searchResults) {
+                System.out.println("Title: " + result.getSnippet().getTitle());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
