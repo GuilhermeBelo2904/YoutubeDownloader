@@ -3,15 +3,49 @@
  */
 package youtubedownloader;
 
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.PlaylistItem;
+import com.google.api.services.youtube.model.PlaylistItemListResponse;
+
+import youtubedownloader.model.YoutubeAPI;
+import java.util.List;
+
 public class App {
     static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
     static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
 
     public static void main(String[] args) {
-        // TODO: #4 Implement the main method
+        test();
+    }
+
+    public static void test() {
+        YoutubeAPI api = new YoutubeAPI();
+        YouTube yt = api.getYouTubeService();
+        String playlistId = api.getPlaylistId("https://www.youtube.com/watch?v=vEyPvak2K9o&list=PL-gjJw1sh-N9J5nhJPcuBBOvk90rIfCJ9");
+
+        try {
+            try {
+                YouTube.PlaylistItems.List request = yt.playlistItems().list("snippet,contentDetails");
+                PlaylistItemListResponse response = request.setPlaylistId(playlistId).setMaxResults(500L).setKey(API_KEY).execute();
+                System.out.println(response.getKind());
+                List<PlaylistItem> items = response.getItems();
+                if (items.isEmpty()) {
+                    System.out.println("No items found in the playlist.");
+                } else {
+                    for (PlaylistItem item : items) {
+                        System.out.printf("Title: %s\n", item.getSnippet().getTitle());
+                        System.out.printf("Video ID: %s\n\n", item.getContentDetails().getVideoId());
+                    }
+                }
+            } catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
+                if (e.getStatusCode() == 404) {
+                    System.err.println("Playlist not found. Please check the playlist ID.");
+                } else {
+                    throw e;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
-
-
-
-

@@ -1,5 +1,4 @@
 package youtubedownloader.model.domain;
 
-public class YoutubeVideo {
-    
+public interface YoutubeVideo {
 }

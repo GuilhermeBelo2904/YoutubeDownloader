@@ -31,4 +31,13 @@ public class YoutubeAPI {
         }
         return videoId;
     }
+
+    public String getPlaylistId(String youtubeLink) {
+        String videoId = youtubeLink.substring(youtubeLink.indexOf("list=") + 5);
+        
+        if (videoId.contains("&index="))
+            videoId = videoId.substring(0, videoId.indexOf("&index="));
+
+        return videoId;
+    }
 }
