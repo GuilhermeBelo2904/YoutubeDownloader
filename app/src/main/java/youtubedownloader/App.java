@@ -4,38 +4,14 @@
 package youtubedownloader;
 
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+    static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
+    static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        // TODO: #4 Implement the main method
     }
 }
 
-// static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
-// static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=LrBu3247qOI";
 
-// YoutubeAPI youtubeAPI = new YoutubeAPI();
 
-//         YouTube youtubeService = youtubeAPI.getYouTubeService();
-//         String videoId = youtubeAPI.getVideoId(YOUTUBE_LINK_EXAMPLE);
 
-//         YouTube.Videos.List request;
-//         try {
-//             request = youtubeService.videos().list("snippet").setId(videoId).setKey(API_KEY);
-//             // System.out.println(request.execute().toPrettyString());
-
-//             VideoListResponse response = request.execute();
-//             var searchResults = response.getItems();
-
-//             for (Video result : searchResults) {
-//                 System.out.println("\nTitle: " + result.getSnippet().getTitle());
-//                 System.out.println("\nDescription: " + result.getSnippet().getDescription());
-//                 System.out.println("\nPublished At: " + result.getSnippet().getPublishedAt());
-//                 System.out.println("\nChannel Title: " + result.getSnippet().getChannelTitle());
-//                 System.out.println("\nThumbnails: " + result.getSnippet().getThumbnails());
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
