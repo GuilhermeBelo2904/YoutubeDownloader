@@ -4,11 +4,14 @@
 package youtubedownloader;
 
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+    static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
+    static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        // TODO: #4 Implement the main method
     }
 }
+
+
+
+

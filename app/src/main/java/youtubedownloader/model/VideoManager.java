@@ -1,5 +1,5 @@
 package youtubedownloader.model;
 
-public class VideoDownloadManager {
+public class VideoManager {
     // TODO: Implement this class
 }

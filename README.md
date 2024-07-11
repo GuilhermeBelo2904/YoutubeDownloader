@@ -63,6 +63,7 @@ To set up your development environment, we recommend using Visual Studio Code an
      - If it's a playlist:
        - Option to download all or selected videos (checklist)
        - Display specific information for each video
+       - Show playlist, author name and number of videos
      - Ability to cut a specific part of the video
      - etc.
 
