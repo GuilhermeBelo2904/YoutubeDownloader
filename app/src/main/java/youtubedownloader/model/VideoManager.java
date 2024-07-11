@@ -37,7 +37,7 @@ public class VideoManager {
         );
     }
 
-    private YoutubeChannel getChannel(String channelId) {
+    private YoutubeChannel getChannel(String channelId) throws YoutubeAPIException {
         Channel channel = youtubeAPI.getChannel(channelId, key);
         ChannelSnippet channelSnippet = channel.getSnippet();
         String channelName = channelSnippet.getTitle();

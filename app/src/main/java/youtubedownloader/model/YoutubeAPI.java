@@ -29,7 +29,7 @@ public class YoutubeAPI {
         }
     }
 
-    public Video getVideo(String url, String key) {
+    public Video getVideo(String url, String key) throws VideoNotFoundException {
         String videoId = extractVideoId(url);
         try {
             YouTube.Videos.List videoList = youtubeService.videos().list("snippet,contentDetails")
@@ -41,7 +41,7 @@ public class YoutubeAPI {
         }
     }
 
-    public Channel getChannel(String channelId, String key) {
+    public Channel getChannel(String channelId, String key) throws ChannelNotFoundException {
         try {
             YouTube.Channels.List channelList = youtubeService.channels().list("snippet")
                     .setId(channelId)
