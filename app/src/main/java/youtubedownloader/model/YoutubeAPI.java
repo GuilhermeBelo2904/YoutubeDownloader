@@ -17,11 +17,11 @@ import youtubedownloader.model.exceptions.YouTubeServiceCreationException;
 public class YoutubeAPI {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final String APPLICATION_NAME = "YoutubeDownloader";
-    private static final YouTube YOUTUBE_SERVICE;
+    private final YouTube youtubeService;
 
-    static {
+    public YoutubeAPI() throws YouTubeServiceCreationException {
         try {
-            YOUTUBE_SERVICE = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
+            this.youtubeService = new YouTube.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, null)
                     .setApplicationName(APPLICATION_NAME)
                     .build();
         } catch (IOException | GeneralSecurityException e) {
@@ -30,9 +30,11 @@ public class YoutubeAPI {
     }
 
     public Video getVideo(String url, String key) {
-        String videoId = getVideoId(url);
+        String videoId = extractVideoId(url);
         try {
-            YouTube.Videos.List videoList = YOUTUBE_SERVICE.videos().list("snippet,contentDetails").setId(videoId).setKey(key);
+            YouTube.Videos.List videoList = youtubeService.videos().list("snippet,contentDetails")
+                    .setId(videoId)
+                    .setKey(key);
             return videoList.execute().getItems().getFirst();
         } catch (IOException e) {
             throw new VideoNotFoundException("Failed to get video.", e);
@@ -41,20 +43,20 @@ public class YoutubeAPI {
 
     public Channel getChannel(String channelId, String key) {
         try {
-            YouTube.Channels.List channelList = YOUTUBE_SERVICE.channels().list("snippet").setId(channelId).setKey(key);
+            YouTube.Channels.List channelList = youtubeService.channels().list("snippet")
+                    .setId(channelId)
+                    .setKey(key);
             return channelList.execute().getItems().getFirst();
         } catch (IOException e) {
             throw new ChannelNotFoundException("Failed to get channel.", e);
         }
     }
 
-    private String getVideoId(String youtubeLink) {
-        String videoId;
+    private String extractVideoId(String youtubeLink) {
         if (youtubeLink.contains("youtu.be")) {
-            videoId = youtubeLink.substring(youtubeLink.lastIndexOf("/") + 1);
+            return youtubeLink.substring(youtubeLink.lastIndexOf("/") + 1);
         } else {
-            videoId = youtubeLink.substring(youtubeLink.indexOf("?v=") + 3);
+            return youtubeLink.substring(youtubeLink.indexOf("?v=") + 3);
         }
-        return videoId;
     }
 }

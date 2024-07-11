@@ -11,15 +11,16 @@ import youtubedownloader.model.domain.YoutubeVideo;
 import youtubedownloader.model.exceptions.YoutubeAPIException;
 
 public class VideoManager {
-    private static final YoutubeAPI YOUTUBE_API = new YoutubeAPI();
+    private final YoutubeAPI youtubeAPI;
     private final String key;
 
-    public VideoManager(String key) {
+    public VideoManager(String key) throws YoutubeAPIException {
         this.key = key;
+        this.youtubeAPI = new YoutubeAPI();   
     }
 
     public YoutubeVideo getVideo(String url) throws YoutubeAPIException {
-        Video video = YOUTUBE_API.getVideo(url, key);
+        Video video = youtubeAPI.getVideo(url, key);
         VideoSnippet videoSnippet = video.getSnippet();
         VideoContentDetails videoContentDetails = video.getContentDetails();
 
@@ -37,7 +38,7 @@ public class VideoManager {
     }
 
     private YoutubeChannel getChannel(String channelId) {
-        Channel channel = YOUTUBE_API.getChannel(channelId, key);
+        Channel channel = youtubeAPI.getChannel(channelId, key);
         ChannelSnippet channelSnippet = channel.getSnippet();
         String channelName = channelSnippet.getTitle();
         String channelPhotoUrl = channelSnippet.getThumbnails().getHigh().getUrl();

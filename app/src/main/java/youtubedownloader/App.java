@@ -3,12 +3,20 @@
  */
 package youtubedownloader;
 
+import youtubedownloader.model.VideoManager;
+import youtubedownloader.model.exceptions.YoutubeAPIException;
+
 public class App {
     static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
     static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
 
     public static void main(String[] args) {
-        // TODO: #4 Implement the main method
+        try {
+            VideoManager videoManager = new VideoManager(API_KEY);
+            System.out.println(videoManager.getVideo(YOUTUBE_LINK_EXAMPLE));
+        } catch (YoutubeAPIException e) {
+            System.err.println("Failed to get video: " + e.getMessage());
+        }
     }
 }
 
