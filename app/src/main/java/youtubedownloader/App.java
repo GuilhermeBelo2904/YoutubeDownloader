@@ -3,12 +3,22 @@
  */
 package youtubedownloader;
 
+import java.util.Scanner;
+
+import youtubedownloader.model.VideoDownloader;
+
 public class App {
     static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
     static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
 
     public static void main(String[] args) {
-        // TODO: #4 Implement the main method
+        Scanner in = new Scanner(System.in);
+        VideoDownloader downloader = new VideoDownloader();
+
+        System.out.println("Insert Link: ");
+        String link = in.nextLine().trim();
+
+        downloader.downloadVideo(link);
     }
 }
 
