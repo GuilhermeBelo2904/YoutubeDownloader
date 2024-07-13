@@ -3,49 +3,76 @@
  */
 package youtubedownloader;
 
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.PlaylistItem;
-import com.google.api.services.youtube.model.PlaylistItemListResponse;
+import youtubedownloader.model.VideoManager;
+import youtubedownloader.model.exceptions.YoutubeAPIException;
 
-import youtubedownloader.model.YoutubeAPI;
-import java.util.List;
+import com.google.api.services.youtube.model.PlaylistItem;
+
+import java.util.Scanner;
 
 public class App {
     static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
     static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
+    static final String PLAYLIST_LINK_EXAMPLE = "https://www.youtube.com/watch?v=3sO-Y1Zbft4&list=PL-gjJw1sh-N8CiJEZkK6I-gwgxNYDzTAb";
+    static int itemNumber = 49;
+    static int page = 1;
 
     public static void main(String[] args) {
-        test();
-    }
-
-    public static void test() {
-        YoutubeAPI api = new YoutubeAPI();
-        YouTube yt = api.getYouTubeService();
-        String playlistId = api.getPlaylistId("https://www.youtube.com/watch?v=vEyPvak2K9o&list=PL-gjJw1sh-N9J5nhJPcuBBOvk90rIfCJ9");
-
+        /*try {
+            VideoManager videoManager = new VideoManager(API_KEY);
+            System.out.println(videoManager.getVideo(YOUTUBE_LINK_EXAMPLE));
+        } catch (YoutubeAPIException e) {
+            System.err.println("Failed to get video: " + e.getMessage());
+        }*/
         try {
-            try {
-                YouTube.PlaylistItems.List request = yt.playlistItems().list("snippet,contentDetails");
-                PlaylistItemListResponse response = request.setPlaylistId(playlistId).setMaxResults(500L).setKey(API_KEY).execute();
-                System.out.println(response.getKind());
-                List<PlaylistItem> items = response.getItems();
-                if (items.isEmpty()) {
-                    System.out.println("No items found in the playlist.");
-                } else {
-                    for (PlaylistItem item : items) {
-                        System.out.printf("Title: %s\n", item.getSnippet().getTitle());
-                        System.out.printf("Video ID: %s\n\n", item.getContentDetails().getVideoId());
-                    }
-                }
-            } catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
-                if (e.getStatusCode() == 404) {
-                    System.err.println("Playlist not found. Please check the playlist ID.");
-                } else {
-                    throw e;
+            VideoManager videoManager = new VideoManager(API_KEY);
+            Scanner in = new Scanner(System.in);
+            String command = "";
+            while (!command.equals("exit")) {
+                System.out.print("Command:");
+                command = in.nextLine().trim().toLowerCase();
+                switch (command) {
+                    case "next" -> hNext(videoManager);
+                    case "same" -> hSame(videoManager);
+                    case "prev" -> hPrev(videoManager);
+                    case "exit" -> System.out.println("bye");
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            in.close();
+        } catch (YoutubeAPIException e) {
+            System.err.println("Failed to get playlist: " + e.getMessage());
         }
+    }
+
+    private static void hNext(VideoManager videoManager) throws YoutubeAPIException {
+        itemNumber++;
+        PlaylistItem item = null;
+        
+        if ((itemNumber + 1) / page > 50) {
+            page++;
+            item = videoManager.getPlaylistItems(PLAYLIST_LINK_EXAMPLE, 1).get(itemNumber - 50*(page - 1));
+        } else
+            item = videoManager.getPlaylistItems(PLAYLIST_LINK_EXAMPLE, 0).get(itemNumber - 50*(page - 1));
+        
+        System.out.printf("N- %d, P- %d, %s | %s\n",itemNumber, page, item.getSnippet().getTitle(), item.getContentDetails().getVideoId());
+    }
+
+    private static void hSame(VideoManager videoManager) throws YoutubeAPIException {
+        PlaylistItem item = videoManager.getPlaylistItems(PLAYLIST_LINK_EXAMPLE, 0).get(itemNumber - 50*(page - 1));
+
+        System.out.printf("N- %d, P- %d, %s | %s\n",itemNumber, page, item.getSnippet().getTitle(), item.getContentDetails().getVideoId());
+    }
+
+    private static void hPrev(VideoManager videoManager) throws YoutubeAPIException {
+        itemNumber--;
+        PlaylistItem item = null;
+        
+        if ((itemNumber + 1) % 50 == 0) {
+            page--;
+            item = videoManager.getPlaylistItems(PLAYLIST_LINK_EXAMPLE, -1).get(itemNumber - 50*(page - 1));
+        } else
+            item = videoManager.getPlaylistItems(PLAYLIST_LINK_EXAMPLE, 0).get(itemNumber - 50*(page - 1));
+
+        System.out.printf("N- %d, P- %d, %s | %s\n",itemNumber, page, item.getSnippet().getTitle(), item.getContentDetails().getVideoId());
     }
 }

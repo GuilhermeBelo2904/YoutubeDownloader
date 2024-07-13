@@ -4,11 +4,11 @@ import java.util.List;
 
 import com.google.api.services.youtube.model.Video;
 
-public class YoutubeVideoClass implements YoutubeVideo {
+public class YoutubePlaylistClass implements YoutubePlaylist {
     private List<Video> videos;
     private int currentVideo;
 
-    public YoutubeVideoClass(List<Video> videos) {
+    public YoutubePlaylistClass(List<Video> videos) {
         this.videos = videos;
         currentVideo = 0;
     }
