@@ -1,7 +1,5 @@
 package youtubedownloader.model;
 
-import java.util.List;
-
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -11,11 +9,12 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.Playlist;
-import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.Video;
 
+import youtubedownloader.model.domain.PlaylistItemHandler;
 import youtubedownloader.model.exceptions.ChannelNotFoundException;
 import youtubedownloader.model.exceptions.PlaylistItemsNotFoundException;
+import youtubedownloader.model.exceptions.PlaylistNotFoundException;
 import youtubedownloader.model.exceptions.VideoNotFoundException;
 import youtubedownloader.model.exceptions.YouTubeServiceCreationException;
 
@@ -40,29 +39,6 @@ public class YoutubeAPI {
         }
     }
 
-    public Playlist getPlaylist(String url, String key) {
-        return null;
-    }
-
-    public List<PlaylistItem> getPlaylistItems(String url, String key, Page page) throws PlaylistItemsNotFoundException {
-        try {
-            YouTube.PlaylistItems.List request = youtubeService.playlistItems().list("snippet,contentDetails")
-                .setPlaylistId(url)
-                .setMaxResults(50L)  // Maximum allowed value
-                .setKey(key);
-
-            PlaylistPageHandler handler = new PlaylistPageHandler(request);
-
-            return switch (page) {
-                case NEXT -> handler.getNextPageItems();
-                case SAME -> handler.getSamePageItems();
-                case PREVIOUS -> handler.getPrevPageItems();
-            };
-        } catch (IOException e) {
-            throw new PlaylistItemsNotFoundException("Failed to get playlist's items", e);
-        }
-    }
-
     public Video getVideo(String url, String key) throws VideoNotFoundException {
         String videoId = getVideoId(url);
         try {
@@ -72,6 +48,33 @@ public class YoutubeAPI {
             return videoList.execute().getItems().get(0);
         } catch (IOException e) {
             throw new VideoNotFoundException("Failed to get video.", e);
+        }
+    }
+
+    public Playlist getPlaylist(String url, String key) throws PlaylistNotFoundException {
+        String playlistId = getPlaylistId(url);
+        try {
+            YouTube.Playlists.List playlistList = youtubeService.playlists().list("snippet,contentDetails")
+                .setId(playlistId)
+                .setKey(key);
+
+            return playlistList.execute().getItems().get(0);
+        } catch (IOException e) {
+            throw new PlaylistNotFoundException("Failed to get playlist", e);
+        }
+    }
+
+    public PlaylistItemHandler getPlaylistItems(String url, String key) throws PlaylistItemsNotFoundException {
+        String playlistId = getPlaylistId(url);
+        try {
+            YouTube.PlaylistItems.List playlistItemsList = youtubeService.playlistItems().list("snippet,contentDetails")
+                .setPlaylistId(playlistId)
+                .setMaxResults(50L)  // Maximum allowed value
+                .setKey(key);
+
+            return new PlaylistItemHandler(playlistItemsList);
+        } catch (IOException e) {
+            throw new PlaylistItemsNotFoundException("Failed to get playlist's items", e);
         }
     }
 
@@ -94,7 +97,7 @@ public class YoutubeAPI {
         }
     }
 
-    public String getPlaylistId(String youtubeLink) {
+    private String getPlaylistId(String youtubeLink) {
         String videoId = youtubeLink.substring(youtubeLink.indexOf("list=") + 5);
         
         if (videoId.contains("&index="))

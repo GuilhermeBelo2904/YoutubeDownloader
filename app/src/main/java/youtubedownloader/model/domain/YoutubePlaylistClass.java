@@ -1,25 +1,38 @@
 package youtubedownloader.model.domain;
 
-import java.util.List;
-
 import com.google.api.services.youtube.model.Video;
 
 public class YoutubePlaylistClass implements YoutubePlaylist {
-    private List<Video> videos;
-    private int currentVideo;
+    // To add: Videos to Download
+    private PlaylistItemHandler itemHandler;
+    private String title;
+    private YoutubeChannel channel;
+    private long nOfVideos;
 
-    public YoutubePlaylistClass(List<Video> videos) {
-        this.videos = videos;
-        currentVideo = 0;
+    public YoutubePlaylistClass(PlaylistItemHandler itemHandler, String title, YoutubeChannel channel, long nOfVideos) {
+        this.itemHandler = itemHandler;
+        this.title = title;
+        this.channel = channel;
+        this.nOfVideos = nOfVideos;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public YoutubeChannel getChannel() {
+        return channel;
+    }
+
+    public int getNOfVideos() {
+        return (int) nOfVideos;
     }
 
     public Video getNext() {
-        currentVideo++;
-        return videos.get(currentVideo);
+        return null;
     }
 
     public Video getPrevious() {
-        currentVideo--;
-        return videos.get(currentVideo);
+        return null;
     }
 }
