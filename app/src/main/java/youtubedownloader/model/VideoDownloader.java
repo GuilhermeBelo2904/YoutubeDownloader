@@ -8,7 +8,7 @@ public class VideoDownloader {
 
     public void downloadVideo(String link){
 
-        String command = "yt-dlp " + link;
+        String command = link;
 
         try {
             Process process = Runtime.getRuntime().exec(command);
@@ -18,9 +18,14 @@ public class VideoDownloader {
             while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String selectQuality(String quality, String link){
+        return "yt-dlp " + " -S \"height:" + quality + "\" -f \"bv*\" " + link;
     }
 
 

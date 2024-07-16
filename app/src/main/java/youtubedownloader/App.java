@@ -17,8 +17,27 @@ public class App {
 
         System.out.println("Insert Link: ");
         String link = in.nextLine().trim();
+        System.out.println("Select quality: 144p\r\n" + //
+                        "360p\r\n" + //
+                        "480p\r\n" + //
+                        "720p\r\n" + //
+                        "1080p\r\n" + 
+                        "Insert quality:");
+        String quality = in.nextLine().trim();
 
-        downloader.downloadVideo(link);
+        downloader.downloadVideo(linkGenerator(in, downloader, link, quality));
+    }
+
+    private static String linkGenerator(Scanner in, VideoDownloader downloader, String link, String quality){
+        return switch (quality) {
+            case "144p" -> downloader.selectQuality("144", link);
+            case "360p" -> downloader.selectQuality("360", link);
+            case "480p" -> downloader.selectQuality("480", link);
+            case "720p" -> downloader.selectQuality("720", link);
+            case "1080p" -> downloader.selectQuality("1080", link);
+            default -> "Invalid quality";
+        };
+        
     }
 }
 
