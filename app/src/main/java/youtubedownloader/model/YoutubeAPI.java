@@ -11,7 +11,7 @@ import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.Video;
 
-import youtubedownloader.model.domain.PlaylistItemHandler;
+import youtubedownloader.model.domain.PlaylistPageHandler;
 import youtubedownloader.model.exceptions.ChannelNotFoundException;
 import youtubedownloader.model.exceptions.PlaylistItemsNotFoundException;
 import youtubedownloader.model.exceptions.PlaylistNotFoundException;
@@ -64,15 +64,15 @@ public class YoutubeAPI {
         }
     }
 
-    public PlaylistItemHandler getPlaylistItems(String url, String key) throws PlaylistItemsNotFoundException {
+    public PlaylistPageHandler getPlaylistItems(String url, String key) throws PlaylistItemsNotFoundException {
         String playlistId = getPlaylistId(url);
         try {
-            YouTube.PlaylistItems.List playlistItemsList = youtubeService.playlistItems().list("snippet,contentDetails")
+            YouTube.PlaylistItems.List playlistItemsList = youtubeService.playlistItems().list("contentDetails,status")
                 .setPlaylistId(playlistId)
                 .setMaxResults(50L)  // Maximum allowed value
                 .setKey(key);
 
-            return new PlaylistItemHandler(playlistItemsList);
+            return new PlaylistPageHandler(playlistItemsList);
         } catch (IOException e) {
             throw new PlaylistItemsNotFoundException("Failed to get playlist's items", e);
         }

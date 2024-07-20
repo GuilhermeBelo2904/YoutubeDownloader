@@ -8,25 +8,38 @@ import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
 import com.google.api.services.youtube.model.PlaylistItemListResponse;
 
-public class PlaylistItemHandler {
+public class PlaylistPageHandler {
     private YouTube.PlaylistItems.List itemsList;
     private String nextPageToken;
-    private int currentPage;
-    private int currentItem;
 
-    public PlaylistItemHandler(YouTube.PlaylistItems.List itemsList) {
+    public PlaylistPageHandler(YouTube.PlaylistItems.List itemsList) {
         this.itemsList = itemsList;
         nextPageToken = null;
-        // Both start at 0
-        currentPage = 0; 
-        currentItem = 0;
     }
 
+    public boolean hasNextPage() {
+        return nextPageToken != null;
+    }
+
+    public List<PlaylistItem> getNextPageItems() throws IOException {
+        List<PlaylistItem> items = newPageResponse().getItems();
+
+        PlaylistItemListResponse response = newPageResponse();
+        nextPageToken = response.getNextPageToken();
+        
+        return items;
+    }
+
+    private PlaylistItemListResponse newPageResponse() throws IOException {
+        return itemsList.setPageToken(nextPageToken).execute();
+    }
+
+    /*
     public PlaylistItem getNext() throws IOException {
         PlaylistItem item;
         currentItem++;
 
-        if ((currentItem + 1) / (currentPage + 1) > 50){
+        if ((currentItem + 1) / (currentPage + 1) > 50) {
             currentPage++;
             item = getNextPageItems().get(currentItem - 50*currentPage);
         } else
@@ -68,9 +81,5 @@ public class PlaylistItemHandler {
         nextPageToken = response.getPrevPageToken();
 
         return newPageResponse().getItems();
-    }
-
-    private PlaylistItemListResponse newPageResponse() throws IOException {
-        return itemsList.setPageToken(nextPageToken).execute();
-    }
+    }*/
 }

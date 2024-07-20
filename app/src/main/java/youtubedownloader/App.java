@@ -3,6 +3,8 @@
  */
 package youtubedownloader;
 
+import java.util.Scanner;
+
 import youtubedownloader.model.VideoManager;
 import youtubedownloader.model.domain.YoutubePlaylist;
 import youtubedownloader.model.exceptions.YoutubeAPIException;
@@ -13,18 +15,25 @@ public class App {
     static final String PLAYLIST_LINK_EXAMPLE = "https://www.youtube.com/watch?v=3sO-Y1Zbft4&list=PL-gjJw1sh-N8CiJEZkK6I-gwgxNYDzTAb";
 
     public static void main(String[] args) {
-        /*try {
-            VideoManager videoManager = new VideoManager(API_KEY);
-            System.out.println(videoManager.getVideo(YOUTUBE_LINK_EXAMPLE));
-        } catch (YoutubeAPIException e) {
-            System.err.println("Failed to get video: " + e.getMessage());
-        }*/
+        Scanner in = new Scanner(System.in);
         try {
             VideoManager videoManager = new VideoManager(API_KEY);
             YoutubePlaylist playlist = videoManager.getPlaylist(PLAYLIST_LINK_EXAMPLE);
-            System.out.println(playlist.getTitle() + "  " + playlist.getNOfVideos());
+            String command = "";
+            do {
+                System.out.print("Command:");
+                command = in.nextLine().trim();
+
+                switch (command) {
+                    case "next" -> System.out.println(playlist.getNext().getTitle());
+                    case "current" -> System.out.println(playlist.getCurrent().getTitle());
+                    case "prev" -> System.out.println(playlist.getPrevious().getTitle());
+                    case "exit" -> System.out.println("Bye");
+                }
+            } while (!command.equals("exit"));
         } catch (YoutubeAPIException e) {
             System.err.println("Failed to get playlist: " + e.getMessage());
         }
+        in.close();
     }
 }
