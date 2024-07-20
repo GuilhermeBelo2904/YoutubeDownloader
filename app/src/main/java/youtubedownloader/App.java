@@ -4,18 +4,28 @@
 package youtubedownloader;
 
 import youtubedownloader.model.VideoManager;
+import youtubedownloader.model.domain.YoutubeVideo;
 import youtubedownloader.model.exceptions.YoutubeAPIException;
 
 public class App {
     static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
-    static final String YOUTUBE_LINK_EXAMPLE = "https://www.youtube.com/watch?v=df_9Q30mNRw";
 
     public static void main(String[] args) {
-        try {
-            VideoManager videoManager = new VideoManager(API_KEY);
-            System.out.println(videoManager.getVideo(YOUTUBE_LINK_EXAMPLE));
-        } catch (YoutubeAPIException e) {
-            System.err.println("Failed to get video: " + e.getMessage());
+        // Console application to test the YoutubeAPI
+        while (true) {
+            System.out.println("\nEnter a Youtube video URL:");
+            String url = System.console().readLine();
+            try {
+                VideoManager videoManager = new VideoManager(API_KEY);
+                YoutubeVideo video = videoManager.getVideo(url);
+                System.out.println("Title: " + video.getTitle());
+                System.out.println("Channel Name: " + video.getChannel().getName());
+                System.out.println("Channel Photo URL: " + video.getChannel().getPhotoUrl());
+                System.out.println("Thumbnail URL: " + video.getThumbnailUrl());
+                System.out.println("Duration: " + video.getDuration());
+            } catch (YoutubeAPIException e) {
+                System.out.println("Failed to get video: " + e.getMessage());
+            }
         }
     }
 }

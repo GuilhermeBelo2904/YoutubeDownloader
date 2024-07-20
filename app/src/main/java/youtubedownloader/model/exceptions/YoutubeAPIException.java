@@ -1,6 +1,8 @@
 package youtubedownloader.model.exceptions;
 
-public class YoutubeAPIException extends Exception {
+import java.io.IOException;
+
+public class YoutubeAPIException extends IOException {
     public YoutubeAPIException(String message, Throwable cause) {
         super(message, cause);
     }

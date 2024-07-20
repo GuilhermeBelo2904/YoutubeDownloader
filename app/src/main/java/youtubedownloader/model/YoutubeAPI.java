@@ -32,7 +32,7 @@ public class YoutubeAPI {
     public Video getVideo(String url, String key) throws VideoNotFoundException {
         String videoId = extractVideoId(url);
         try {
-            YouTube.Videos.List videoList = youtubeService.videos().list("snippet,contentDetails")
+            YouTube.Videos.List videoList = youtubeService.videos().list("snippet,contentDetails,status")
                     .setId(videoId)
                     .setKey(key);
             return videoList.execute().getItems().getFirst();
