@@ -1,25 +1,20 @@
 package youtubedownloader.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.ChannelSnippet;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.PlaylistContentDetails;
-import com.google.api.services.youtube.model.PlaylistItem;
-import com.google.api.services.youtube.model.PlaylistItemSnippet;
 import com.google.api.services.youtube.model.PlaylistSnippet;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoContentDetails;
 import com.google.api.services.youtube.model.VideoSnippet;
 
-import youtubedownloader.model.domain.PlaylistPageHandler;
 import youtubedownloader.model.domain.YoutubeChannel;
 import youtubedownloader.model.domain.YoutubePlaylist;
 import youtubedownloader.model.domain.YoutubePlaylistClass;
 import youtubedownloader.model.domain.YoutubeVideo;
 import youtubedownloader.model.exceptions.YoutubeAPIException;
+import youtubedownloader.model.utils.PlaylistItemHandler;
 
 public class VideoManager {
     private final YoutubeAPI youtubeAPI;
@@ -30,52 +25,8 @@ public class VideoManager {
         this.youtubeAPI = new YoutubeAPI();   
     }
 
-    public YoutubeVideo getVideo(String url) throws YoutubeAPIException {
-        Video video = youtubeAPI.getVideo(url, key);
-        return toYoutubeVideo(video);
-    }
-
-    public YoutubePlaylist getPlaylist(String url) throws YoutubeAPIException {
-        Playlist playlist = youtubeAPI.getPlaylist(url, key);
-        PlaylistSnippet playlistSnippet = playlist.getSnippet();
-        PlaylistContentDetails playlistContentDetails = playlist.getContentDetails();
-
-        String title = playlistSnippet.getTitle();
-        YoutubeChannel youtubeChannel = getChannel(playlistSnippet.getChannelId());
-        long nOfVideos = playlistContentDetails.getItemCount();
-        List<YoutubeVideo> playlistVideos = getPlaylistVideos(url, (int) nOfVideos);
-
-        return new YoutubePlaylistClass(
-            playlistVideos,
-            title,
-            youtubeChannel,
-            nOfVideos
-        );
-    }
-
-    private List<YoutubeVideo> getPlaylistVideos(String url, int nOfVideos) throws YoutubeAPIException {
-        List<YoutubeVideo> videos = new ArrayList<>();
-        String nextPageToken = null;
-        int remainingVideos = nOfVideos;
-
-        while (remainingVideos > 0) {
-            PlaylistPageHandler pageHandler = youtubeAPI.getPlaylistItems(url, key, nextPageToken);
-            List<PlaylistItem> items = pageHandler.getItems();
-            for (PlaylistItem item : items) {
-                videos.add(toYoutubeVideo(item));
-                if (--remainingVideos <= 0) {
-                    break;
-                }
-            }
-            nextPageToken = pageHandler.getNextPageToken();
-            if (nextPageToken == null) {
-                break;
-            }
-        }
-        return videos;
-    }
-
-    private YoutubeVideo toYoutubeVideo(Video video) throws YoutubeAPIException {
+    public YoutubeVideo getVideo(String id) throws YoutubeAPIException {
+        Video video = youtubeAPI.getVideo(id, key);
         VideoSnippet videoSnippet = video.getSnippet();
         VideoContentDetails videoContentDetails = video.getContentDetails();
 
@@ -92,20 +43,43 @@ public class VideoManager {
         );
     }
 
-    private YoutubeVideo toYoutubeVideo(PlaylistItem item) throws YoutubeAPIException {
-        PlaylistItemSnippet playlistItemSnippet = item.getSnippet();
-        String title = playlistItemSnippet.getTitle();
-        YoutubeChannel youtubeChannel = getChannel(playlistItemSnippet.getChannelId());
-        String thumbnailUrl = playlistItemSnippet.getThumbnails().getHigh().getUrl();
-        String videoId = playlistItemSnippet.getResourceId().getVideoId();
-        String duration = youtubeAPI.getVideoDuration(videoId, key);
+    public YoutubePlaylist getPlaylist(String id) throws YoutubeAPIException {
+        Playlist playlist = youtubeAPI.getPlaylist(id, key);
+        PlaylistSnippet playlistSnippet = playlist.getSnippet();
+        PlaylistContentDetails playlistContentDetails = playlist.getContentDetails();
 
-        return new YoutubeVideo(
+        String title = playlistSnippet.getTitle();
+        YoutubeChannel youtubeChannel = getChannel(playlistSnippet.getChannelId());
+        long nOfVideos = playlistContentDetails.getItemCount();
+        PlaylistItemHandler itemHandler = youtubeAPI.getPlaylistItems(id, key,(int) nOfVideos);
+
+        return new YoutubePlaylistClass(
+            itemHandler,
             title,
-            youtubeChannel, 
-            thumbnailUrl, 
-            duration
+            youtubeChannel,
+            nOfVideos
         );
+    }
+
+    public String getVideoId(String youtubeLink) {
+        if (youtubeLink.contains("youtu.be")) {
+            return youtubeLink.substring(youtubeLink.lastIndexOf("/") + 1);
+        } else {
+            return youtubeLink.substring(youtubeLink.indexOf("?v=") + 3);
+        }
+    }
+
+    public String getPlaylistId(String youtubeLink) {
+        String videoId = youtubeLink.substring(youtubeLink.indexOf("list=") + 5);
+        
+        if (videoId.contains("&index="))
+            videoId = videoId.substring(0, videoId.indexOf("&index="));
+
+        return videoId;
+    }
+
+    public boolean isPlaylist(String url) {
+        return url.contains("list=");
     }
 
     private YoutubeChannel getChannel(String channelId) throws YoutubeAPIException {
