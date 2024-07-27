@@ -1,20 +1,22 @@
 package youtubedownloader.model.domain;
 
+import java.io.IOException;
 import java.util.List;
 
+import youtubedownloader.model.exceptions.PageOutOfBoundsException;
+import youtubedownloader.model.utils.PlaylistItemHandler;
+
 public class YoutubePlaylistClass implements YoutubePlaylist {
-    private List<YoutubeVideo> videos;
+    private PlaylistItemHandler itemHandler;
     private String title;
     private YoutubeChannel channel;
     private long nOfVideos;
-    private int currentVideo;
 
-    public YoutubePlaylistClass(List<YoutubeVideo> videos, String title, YoutubeChannel channel, long nOfVideos) {
-        this.videos = videos;
+    public YoutubePlaylistClass(PlaylistItemHandler itemHandler, String title, YoutubeChannel channel, long nOfVideos) {
+        this.itemHandler = itemHandler;
         this.title = title;
         this.channel = channel;
         this.nOfVideos = nOfVideos;
-        this.currentVideo = 0;
     }
 
     public String getTitle() {
@@ -29,15 +31,19 @@ public class YoutubePlaylistClass implements YoutubePlaylist {
         return (int) nOfVideos;
     }
 
-    public YoutubeVideo getNext() {
-        return videos.get(++currentVideo);
+    public String getVideoId(int videoNumber) throws IOException {
+        return getCurrentPage().get(videoNumber - 1).getVideoId();
     }
 
-    public YoutubeVideo getCurrent() {
-        return videos.get(currentVideo);
+    public List<YoutubePlaylistItem> getNextPage() throws PageOutOfBoundsException, IOException {
+        return itemHandler.getNextPageItems();
     }
 
-    public YoutubeVideo getPrevious() {
-        return videos.get(--currentVideo);
+    public List<YoutubePlaylistItem> getCurrentPage() throws IOException {
+        return itemHandler.getCurrentPageItems();
+    }
+
+    public List<YoutubePlaylistItem> getPreviousPage() throws PageOutOfBoundsException, IOException {
+        return itemHandler.getPrevPageItems();
     }
 }

@@ -11,12 +11,12 @@ import com.google.api.services.youtube.model.Channel;
 import com.google.api.services.youtube.model.Playlist;
 import com.google.api.services.youtube.model.Video;
 
-import youtubedownloader.model.domain.PlaylistPageHandler;
 import youtubedownloader.model.exceptions.ChannelNotFoundException;
 import youtubedownloader.model.exceptions.PlaylistItemsNotFoundException;
 import youtubedownloader.model.exceptions.PlaylistNotFoundException;
 import youtubedownloader.model.exceptions.VideoNotFoundException;
 import youtubedownloader.model.exceptions.YouTubeServiceCreationException;
+import youtubedownloader.model.utils.PlaylistItemHandler;
 
 public class YoutubeAPI {
     public enum Page {
@@ -39,8 +39,7 @@ public class YoutubeAPI {
         }
     }
 
-    public Video getVideo(String url, String key) throws VideoNotFoundException {
-        String videoId = getVideoId(url);
+    public Video getVideo(String videoId, String key) throws VideoNotFoundException {
         try {
             YouTube.Videos.List videoList = youtubeService.videos().list("snippet,contentDetails")
                     .setId(videoId)
@@ -51,8 +50,7 @@ public class YoutubeAPI {
         }
     }
 
-    public Playlist getPlaylist(String url, String key) throws PlaylistNotFoundException {
-        String playlistId = getPlaylistId(url);
+    public Playlist getPlaylist(String playlistId, String key) throws PlaylistNotFoundException {
         try {
             YouTube.Playlists.List playlistList = youtubeService.playlists().list("snippet,contentDetails")
                 .setId(playlistId)
@@ -64,15 +62,14 @@ public class YoutubeAPI {
         }
     }
 
-    public PlaylistPageHandler getPlaylistItems(String url, String key) throws PlaylistItemsNotFoundException {
-        String playlistId = getPlaylistId(url);
+    public PlaylistItemHandler getPlaylistItems(String playlistId, String key, int nOfVideos) throws PlaylistItemsNotFoundException {
         try {
-            YouTube.PlaylistItems.List playlistItemsList = youtubeService.playlistItems().list("contentDetails,status")
+            YouTube.PlaylistItems.List playlistItemsList = youtubeService.playlistItems().list("snippet,contentDetails,status")
                 .setPlaylistId(playlistId)
                 .setMaxResults(50L)  // Maximum allowed value
                 .setKey(key);
 
-            return new PlaylistPageHandler(playlistItemsList);
+            return new PlaylistItemHandler(playlistItemsList,nOfVideos);
         } catch (IOException e) {
             throw new PlaylistItemsNotFoundException("Failed to get playlist's items", e);
         }
@@ -87,22 +84,5 @@ public class YoutubeAPI {
         } catch (IOException e) {
             throw new ChannelNotFoundException("Failed to get channel.", e);
         }
-    }
-
-    private String getVideoId(String youtubeLink) {
-        if (youtubeLink.contains("youtu.be")) {
-            return youtubeLink.substring(youtubeLink.lastIndexOf("/") + 1);
-        } else {
-            return youtubeLink.substring(youtubeLink.indexOf("?v=") + 3);
-        }
-    }
-
-    private String getPlaylistId(String youtubeLink) {
-        String videoId = youtubeLink.substring(youtubeLink.indexOf("list=") + 5);
-        
-        if (videoId.contains("&index="))
-            videoId = videoId.substring(0, videoId.indexOf("&index="));
-
-        return videoId;
     }
 }
