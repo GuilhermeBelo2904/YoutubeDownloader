@@ -6,6 +6,7 @@ package youtubedownloader;
 import java.io.IOException;
 import static java.lang.System.err;
 import static java.lang.System.out;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -45,19 +46,24 @@ public class App {
             String command;
             String quality = null;
             String type = null;
+            HashSet<String> selectedItems = new HashSet<>();
+
+            currentPage(playlist);
             do {
                 out.println("Command:");
                 command = in.nextLine().trim().toUpperCase();
                 try {
                     switch (command) {
                         case "SEE VIDEO X" -> seeVideo(in,videoManager,playlist);
-                        case "DESELECT X" -> {/*TODO*/}
-                        case "SELECT X" -> {/*TODO*/}
-                        case "SELECT X-Y" -> {/*TODO*/}
-                        case "DESELECT X-Y" -> {/*TODO*/}
-                        case "SELECT ALL" -> {/*TODO*/}
+                        case "SEE SELECTED" -> seeSelectedVideos(selectedItems, videoManager);
+                        case "SELECT X" -> selectSingleVideo(in, playlist, selectedItems);
+                        case "DESELECT X" -> deselectSingleVideo(in, playlist, selectedItems);
+                        case "SELECT X-Y" -> selectRangeOfVideos(in, playlist, selectedItems);
+                        case "DESELECT X-Y" -> deselectRangeOfVideos(in, playlist, selectedItems);
+                        case "SELECT ALL" -> selectAllVideos(playlist, selectedItems);
+                        case "DESELECT ALL" -> deselectAllVideos(selectedItems);
                         case "DOWNLOAD" -> {
-                            if (quality != null && type != null) {
+                            if (quality != null && type != null && !selectedItems.isEmpty()) {
                                 // TODO
                             } else {
                                 out.println("Choose Quality and Type to Download!");
@@ -131,6 +137,98 @@ public class App {
         out.println("Channel Photo Url: " + video.getChannel().getPhotoUrl());
         out.println("Thumbnail Url: " + video.getThumbnailUrl());
         out.println("Duration: " + video.getDuration());
+    }
+
+    private static void seeSelectedVideos(HashSet<String> selectedItems, VideoManager videoManager) throws YoutubeAPIException {
+        if (selectedItems.isEmpty()) {
+            out.println("No videos selected");
+        } else {
+            out.println("There are " + selectedItems.size() + " videos selected");
+            for (String videoId: selectedItems) {
+                YoutubeVideo video = videoManager.getVideo(videoId);
+                out.println("Title: " + video.getTitle());
+            }
+        }
+    }
+    
+    private static void deselectSingleVideo(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a video from the page to deselect");
+        int videoNumber = in.nextInt();
+        in.nextLine();
+        
+        String videoId = playlist.getVideoId(videoNumber);
+
+        if (selectedItems.remove(videoId)) {
+            out.println("Video deselected");
+        } else {
+            out.println("Video not selected");
+        }
+    }
+
+    private static void selectSingleVideo(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a video from the page to select");
+        int videoNumber = in.nextInt();
+        in.nextLine();
+        
+        String videoId = playlist.getVideoId(videoNumber);
+
+        if (selectedItems.add(videoId)) {
+            out.println("Video selected");
+        } else {
+            out.println("Video already selected");
+        }
+    }
+
+    private static void deselectRangeOfVideos(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a range of videos from the page to deselect");
+        int start = in.nextInt();
+        int end = in.nextInt();
+        in.nextLine();
+
+        for (int i = start; i <= end; i++) {
+            String videoId = playlist.getVideoId(i);
+            if (selectedItems.remove(videoId)) {
+                out.printf("Video %d deselected%n", i);
+            } else {
+                out.printf("Video %d not selected%n", i);
+            }
+        }
+    }
+
+    private static void selectRangeOfVideos(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a range of videos from the page to select");
+        int start = in.nextInt();
+        int end = in.nextInt();
+        in.nextLine();
+
+        for (int i = start; i <= end; i++) {
+            String videoId = playlist.getVideoId(i);
+            if (!selectedItems.add(videoId)) {
+                out.printf("Video %d already selected%n", i);
+            } else {
+                out.printf("Video %d selected%n", i);
+            }
+        }
+    }
+
+    // This method will select all videos from all the pages of the playlist
+    private static void selectAllVideos(YoutubePlaylist playlist, HashSet<String> selectedItems) {
+        try {
+             do {
+                List<YoutubePlaylistItem> items = playlist.getNextPage();
+                for (YoutubePlaylistItem item: items) {
+                    String videoId = item.getVideoId();
+                    selectedItems.add(videoId);
+                }
+             } while (true);
+        } catch (IOException | PageOutOfBoundsException e) {
+            out.println("All videos selected");
+        }
+    }
+
+    private static void deselectAllVideos(HashSet<String> selectedItems) {
+        selectedItems.clear();
+        out.println("All videos deselected");
     }
 
 
