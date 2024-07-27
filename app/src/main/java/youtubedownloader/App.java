@@ -4,9 +4,11 @@
 package youtubedownloader;
 
 import java.io.IOException;
-import java.util.Scanner;
-
+import static java.lang.System.err;
+import static java.lang.System.out;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 
 import youtubedownloader.model.VideoManager;
 import youtubedownloader.model.domain.YoutubePlaylist;
@@ -19,21 +21,21 @@ public class App {
     static final String API_KEY = "AIzaSyCLtNPNHaj9Wot6U1rmGYW0zuUbMRb9C7s";
 
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        try {
-            VideoManager videoManager = new VideoManager(API_KEY);
-            System.out.println("Insert a link:");
-            String url = in.nextLine().trim();
-
-            if (videoManager.isPlaylist(url))
-                handlePlaylist(in,videoManager,url);
-            else
-                handleVideo(in,videoManager,url);
-        
-        } catch (YoutubeAPIException e) {
-            System.err.println("Failed to connect with API: " + e.getMessage());
-        }
-        in.close();
+        try (Scanner in = new Scanner(System.in)) {
+            try {
+                VideoManager videoManager = new VideoManager(API_KEY);
+                out.println("Insert a link:");
+                String url = in.nextLine().trim();
+                
+                if (videoManager.isPlaylist(url))
+                    handlePlaylist(in,videoManager,url);
+                else
+                    handleVideo(in,videoManager,url);
+                
+            } catch (YoutubeAPIException e) {
+                err.println("Failed to connect with API: " + e.getMessage());
+            }
+        }    
     }
 
     private static void handlePlaylist(Scanner in, VideoManager videoManager, String url) {
@@ -44,22 +46,27 @@ public class App {
             String command;
             String quality = null;
             String type = null;
+            HashSet<String> selectedItems = new HashSet<>();
+
+            currentPage(playlist);
             do {
-                System.out.println("Command:");
+                out.println("Command:");
                 command = in.nextLine().trim().toUpperCase();
                 try {
                     switch (command) {
                         case "SEE VIDEO X" -> seeVideo(in,videoManager,playlist);
-                        case "DESELECT X" -> {/*TODO*/}
-                        case "SELECT X" -> {/*TODO*/}
-                        case "SELECT X-Y" -> {/*TODO*/}
-                        case "DESELECT X-Y" -> {/*TODO*/}
-                        case "SELECT ALL" -> {/*TODO*/}
+                        case "SEE SELECTED" -> seeSelectedVideos(selectedItems, videoManager);
+                        case "SELECT X" -> selectSingleVideo(in, playlist, selectedItems);
+                        case "DESELECT X" -> deselectSingleVideo(in, playlist, selectedItems);
+                        case "SELECT X-Y" -> selectRangeOfVideos(in, playlist, selectedItems);
+                        case "DESELECT X-Y" -> deselectRangeOfVideos(in, playlist, selectedItems);
+                        case "SELECT ALL" -> selectAllVideos(playlist, selectedItems);
+                        case "DESELECT ALL" -> deselectAllVideos(selectedItems);
                         case "DOWNLOAD" -> {
-                            if (quality != null && type != null) {
+                            if (quality != null && type != null && !selectedItems.isEmpty()) {
                                 // TODO
                             } else {
-                                System.out.println("Choose Quality and Type to Download!");
+                                out.println("Choose Quality and Type to Download!");
                             }
                         }
                         case "QUALITY" -> {/*TODO*/}
@@ -67,15 +74,15 @@ public class App {
                         case "NEXT" -> nextPage(playlist);
                         case "CURRENT" -> currentPage(playlist);
                         case "PREV" -> previousPage(playlist);
-                        case "EXIT" -> System.out.println("Bye");
-                        default -> System.out.println("Insert Valid Command!");
+                        case "EXIT" -> out.println("Bye");
+                        default -> out.println("Insert Valid Command!");
                     }
-                } catch (IOException | YoutubeAPIException e) {
-                    System.err.println("Error ocurred: " + e.getMessage());
+                } catch (IOException e) {
+                    err.println("Error ocurred: " + e.getMessage());
                 }
             } while (!command.equals("EXIT"));
         } catch (YoutubeAPIException e) {
-            System.err.println("Failed to get playlist: " + e.getMessage());
+            err.println("Failed to get playlist: " + e.getMessage());
         }
     }
 
@@ -88,48 +95,139 @@ public class App {
             String quality = null;
             String type = null;
             do {
-                System.out.println("Title: " + video.getTitle());
-                System.out.println("Channel Name: " + video.getChannel().getName());
-                System.out.println("Channel Photo Url: " + video.getChannel().getPhotoUrl());
-                System.out.println("Thumbnail Url: " + video.getThumbnailUrl());
-                System.out.println("Duration: " + video.getDuration());
+                out.println("Title: " + video.getTitle());
+                out.println("Channel Name: " + video.getChannel().getName());
+                out.println("Channel Photo Url: " + video.getChannel().getPhotoUrl());
+                out.println("Thumbnail Url: " + video.getThumbnailUrl());
+                out.println("Duration: " + video.getDuration());
 
-                System.out.print("Command:");
+                out.print("Command:");
                 command = in.nextLine().trim().toUpperCase();
-                System.out.println();
+                out.println();
 
                 switch (command) {
                     case "DOWNLOAD" -> {
                         if (quality != null && type != null) {
                             // TODO
                         } else {
-                            System.out.println("Choose Quality and Type to Download!");
+                            out.println("Choose Quality and Type to Download!");
                         }
                     }
                     case "QUALITY" -> {/*TODO*/}
                     case "TYPE" -> {/*TODO*/}
-                    case "EXIT" -> System.out.println("Bye");
-                    default -> System.out.println("Insert Valid Command!");
+                    case "EXIT" -> out.println("Bye");
+                    default -> out.println("Insert Valid Command!");
                 }
             } while (!command.equals("EXIT"));
         } catch (YoutubeAPIException e) {
-            System.err.println("Failed to get video: " + e.getMessage());
+            err.println("Failed to get video: " + e.getMessage());
         }
     }
 
-    private static void seeVideo(Scanner in, VideoManager videoManager, YoutubePlaylist playlist) throws IOException, YoutubeAPIException {
-        System.out.println("Choose a video from the page");
+    private static void seeVideo(Scanner in, VideoManager videoManager, YoutubePlaylist playlist) throws IOException {
+        out.println("Choose a video from the page");
         int videoNumber = in.nextInt();
         in.nextLine();
         
         String videoId = playlist.getVideoId(videoNumber);
         YoutubeVideo video = videoManager.getVideo(videoId);
 
-        System.out.println("Title: " + video.getTitle());
-        System.out.println("Channel Name: " + video.getChannel().getName());
-        System.out.println("Channel Photo Url: " + video.getChannel().getPhotoUrl());
-        System.out.println("Thumbnail Url: " + video.getThumbnailUrl());
-        System.out.println("Duration: " + video.getDuration());
+        out.println("Title: " + video.getTitle());
+        out.println("Channel Name: " + video.getChannel().getName());
+        out.println("Channel Photo Url: " + video.getChannel().getPhotoUrl());
+        out.println("Thumbnail Url: " + video.getThumbnailUrl());
+        out.println("Duration: " + video.getDuration());
+    }
+
+    private static void seeSelectedVideos(HashSet<String> selectedItems, VideoManager videoManager) throws YoutubeAPIException {
+        if (selectedItems.isEmpty()) {
+            out.println("No videos selected");
+        } else {
+            out.println("There are " + selectedItems.size() + " videos selected");
+            for (String videoId: selectedItems) {
+                YoutubeVideo video = videoManager.getVideo(videoId);
+                out.println("Title: " + video.getTitle());
+            }
+        }
+    }
+    
+    private static void deselectSingleVideo(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a video from the page to deselect");
+        int videoNumber = in.nextInt();
+        in.nextLine();
+        
+        String videoId = playlist.getVideoId(videoNumber);
+
+        if (selectedItems.remove(videoId)) {
+            out.println("Video deselected");
+        } else {
+            out.println("Video not selected");
+        }
+    }
+
+    private static void selectSingleVideo(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a video from the page to select");
+        int videoNumber = in.nextInt();
+        in.nextLine();
+        
+        String videoId = playlist.getVideoId(videoNumber);
+
+        if (selectedItems.add(videoId)) {
+            out.println("Video selected");
+        } else {
+            out.println("Video already selected");
+        }
+    }
+
+    private static void deselectRangeOfVideos(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a range of videos from the page to deselect");
+        int start = in.nextInt();
+        int end = in.nextInt();
+        in.nextLine();
+
+        for (int i = start; i <= end; i++) {
+            String videoId = playlist.getVideoId(i);
+            if (selectedItems.remove(videoId)) {
+                out.printf("Video %d deselected%n", i);
+            } else {
+                out.printf("Video %d not selected%n", i);
+            }
+        }
+    }
+
+    private static void selectRangeOfVideos(Scanner in, YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        out.println("Choose a range of videos from the page to select");
+        int start = in.nextInt();
+        int end = in.nextInt();
+        in.nextLine();
+
+        for (int i = start; i <= end; i++) {
+            String videoId = playlist.getVideoId(i);
+            if (!selectedItems.add(videoId)) {
+                out.printf("Video %d already selected%n", i);
+            } else {
+                out.printf("Video %d selected%n", i);
+            }
+        }
+    }
+
+    private static void selectAllVideos(YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
+        try {
+             do {
+                List<YoutubePlaylistItem> items = playlist.getNextPage();
+                for (YoutubePlaylistItem item: items) {
+                    String videoId = item.getVideoId();
+                    selectedItems.add(videoId);
+                }
+             } while (true);
+        } catch (PageOutOfBoundsException e) {
+            out.println("All videos selected");
+        }
+    }
+
+    private static void deselectAllVideos(HashSet<String> selectedItems) {
+        selectedItems.clear();
+        out.println("All videos deselected");
     }
 
 
@@ -137,7 +235,8 @@ public class App {
         try {
             printItems(playlist.getNextPage());
         } catch (IOException | PageOutOfBoundsException e) {
-            System.err.println("Failed to get playlist page: " + e.getMessage());
+            String message = e instanceof PageOutOfBoundsException ? "No more pages" : e.getMessage();
+            err.println(message);
         }
     }
 
@@ -145,7 +244,7 @@ public class App {
         try {
             printItems(playlist.getCurrentPage());
         } catch (IOException e) {
-            System.err.println("Failed to get playlist page: " + e.getMessage());
+            err.println("Failed to get playlist page: " + e.getMessage());
         }
     }
 
@@ -153,13 +252,13 @@ public class App {
         try {
             printItems(playlist.getPreviousPage());
         } catch (IOException | PageOutOfBoundsException e) {
-            System.err.println("Failed to get playlist page: " + e.getMessage());
+            err.println("Failed to get playlist page: " + e.getMessage());
         }
     }
 
     private static void printItems(List<YoutubePlaylistItem> items) {
         int i = 1;
         for (YoutubePlaylistItem item: items)
-            System.out.println(i++ + ". " + item.getTitle());
+            out.println(i++ + ". " + item.getTitle());
     }
 }

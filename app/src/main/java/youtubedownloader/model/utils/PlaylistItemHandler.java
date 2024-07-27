@@ -1,10 +1,8 @@
 package youtubedownloader.model.utils;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.lang.Math;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistItem;
@@ -17,14 +15,15 @@ public class PlaylistItemHandler {
     private static final int ITEMS_PER_PAGE = 50;
     private static final int STARTING_PAGE = 1;
 
-    private YouTube.PlaylistItems.List itemsList;
+    private final YouTube.PlaylistItems.List itemsList;
     private String nextPageToken;
-    private int lastPage, currentPage;
+    private final int lastPage;
+    private int currentPage;
 
     public PlaylistItemHandler(YouTube.PlaylistItems.List itemsList, int nOfItems) {
         this.itemsList = itemsList;
         nextPageToken = null;
-        lastPage = (int) Math.ceil((double)nOfItems /ITEMS_PER_PAGE);
+        lastPage = (int) Math.ceil((double) nOfItems / ITEMS_PER_PAGE);
         
         currentPage = STARTING_PAGE;
     }

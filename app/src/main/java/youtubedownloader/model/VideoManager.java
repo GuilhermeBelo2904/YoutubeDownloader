@@ -62,24 +62,32 @@ public class VideoManager {
     }
 
     public String getVideoId(String youtubeLink) {
-        if (youtubeLink.contains("youtu.be")) {
-            return youtubeLink.substring(youtubeLink.lastIndexOf("/") + 1);
+        if (!isPlaylist(youtubeLink)) {
+            if (youtubeLink.contains("youtu.be")) {
+                return youtubeLink.substring(youtubeLink.lastIndexOf("/") + 1);
+            } else {
+                return youtubeLink.substring(youtubeLink.indexOf("?v=") + 3);
+            }
         } else {
-            return youtubeLink.substring(youtubeLink.indexOf("?v=") + 3);
+            return null;
         }
     }
 
     public String getPlaylistId(String youtubeLink) {
-        String videoId = youtubeLink.substring(youtubeLink.indexOf("list=") + 5);
-        
-        if (videoId.contains("&index="))
-            videoId = videoId.substring(0, videoId.indexOf("&index="));
+        if (isPlaylist(youtubeLink)) {
+            String videoId = youtubeLink.substring(youtubeLink.indexOf("list=") + 5);
+            
+            if (videoId.contains("&index="))
+                videoId = videoId.substring(0, videoId.indexOf("&index="));
 
-        return videoId;
+            return videoId;
+        } else {
+            return null;
+        }
     }
 
     public boolean isPlaylist(String url) {
-        return url.contains("list");
+        return url.contains("list=");
     }
 
     private YoutubeChannel getChannel(String channelId) throws YoutubeAPIException {
