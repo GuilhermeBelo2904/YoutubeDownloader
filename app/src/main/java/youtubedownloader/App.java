@@ -211,8 +211,7 @@ public class App {
         }
     }
 
-    // This method will select all videos from all the pages of the playlist
-    private static void selectAllVideos(YoutubePlaylist playlist, HashSet<String> selectedItems) {
+    private static void selectAllVideos(YoutubePlaylist playlist, HashSet<String> selectedItems) throws IOException {
         try {
              do {
                 List<YoutubePlaylistItem> items = playlist.getNextPage();
@@ -221,7 +220,7 @@ public class App {
                     selectedItems.add(videoId);
                 }
              } while (true);
-        } catch (IOException | PageOutOfBoundsException e) {
+        } catch (PageOutOfBoundsException e) {
             out.println("All videos selected");
         }
     }
